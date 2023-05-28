@@ -1,4 +1,6 @@
-#include "vendors/GLFW/glfw3.h"
+#include "../dependencies/include/glad/glad.h"
+#include "../dependencies/include/GLFW/glfw3.h"
+#include "draw.h"
 #include <stdbool.h>
 #include <stdio.h>
 
@@ -18,6 +20,14 @@ int main()
     if (!glfwInit())
         return -1;
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Algorithm Visualization", NULL, NULL);
     if (!window) {
@@ -31,6 +41,13 @@ int main()
     /* Set up a callback function for when the window is resized */
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        printf("Failed to initialize GLAD");
+        return -1;
+    }
+
+    prepare();
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)) {
         /* Input */
@@ -40,12 +57,16 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        draw();
+
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
         /* Poll for and process events */
         glfwPollEvents();
     }
+
+    cleanup();
 
     glfwTerminate();
     return 0;
